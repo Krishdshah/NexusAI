@@ -23,7 +23,7 @@ export default function SideNavBar() {
         <div className="px-3 mb-4">
           <p className="font-label-caps text-[10px] text-outline uppercase tracking-widest">Discovery Shell</p>
         </div>
-        <nav className="flex flex-col gap-1 overflow-y-auto">
+        <nav className="flex flex-col gap-1 overflow-y-auto overflow-x-hidden pr-2">
           {links.map((link) => {
             const isActive = pathname === link.href;
             return (
