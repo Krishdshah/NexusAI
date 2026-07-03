@@ -1,190 +1,163 @@
-# NexusAI Database Schema
+# NexusAI Database Specification
 
-This document outlines the production-grade PostgreSQL schema for NexusAI. The database is highly normalized and designed to support fast deterministic searching, relationship tracking, and detailed logging for the AI agent's execution and validation pipelines.
+This document provides the final, exhaustive specification of the PostgreSQL database schema used by the NexusAI platform. The database is built around the **Agent Lifecycle**, dividing tables across three distinct schemas: `business`, `agent`, and `analytics`.
 
-## 1. Core Entities
+## Core Conventions
+- **Primary Keys**: UUID (`uuid_generate_v4()`) for every table.
+- **Audit Columns**: Every table includes `created_at`, `updated_at`, `created_by`, `updated_by`, and `is_deleted` (Soft Delete).
+- **Enums**: Used extensively instead of arbitrary strings.
 
-### `users`
-Represents the human users interacting with the platform.
-- `id` (UUID, PK)
-- `email` (VARCHAR, Unique, Indexed)
-- `name` (VARCHAR)
-- `role` (VARCHAR) - e.g., 'admin', 'procurement', 'standard'
-- `created_at` (TIMESTAMP)
-- `updated_at` (TIMESTAMP)
+---
 
-### `businesses`
-Represents client or partner organizations.
-- `id` (UUID, PK)
-- `name` (VARCHAR, Indexed)
-- `industry` (VARCHAR)
-- `company_size` (VARCHAR)
-- `founded_year` (INTEGER)
-- `website` (VARCHAR)
-- `created_at` (TIMESTAMP)
+## Schema: `agent` (The Heart of the System)
+Models the complete lifecycle of a user request from query to human approval.
 
-### `suppliers`
-Represents companies providing goods or services.
-- `id` (UUID, PK)
-- `name` (VARCHAR, Indexed)
-- `description` (TEXT)
-- `production_capacity` (INTEGER) - e.g., units per month
-- `lead_time_days` (INTEGER)
-- `status` (VARCHAR) - e.g., 'active', 'inactive', 'under_review'
-- `created_at` (TIMESTAMP)
+### Enums
+- `AgentRunStatus`: `RUNNING`, `COMPLETED`, `FAILED`, `AWAITING_APPROVAL`
+- `ApprovalStatus`: `PENDING`, `APPROVED`, `REJECTED`, `MODIFIED`
+- `ExecutionStatus`: `SUCCESS`, `FAILURE`, `RETRYING`
 
-### `professionals`
-Represents individual talents or freelancers.
-- `id` (UUID, PK)
-- `first_name` (VARCHAR)
-- `last_name` (VARCHAR)
-- `title` (VARCHAR)
-- `hourly_rate` (NUMERIC(10, 2))
-- `created_at` (TIMESTAMP)
+### Table: `agent_runs`
+**Purpose**: The central node for any interaction. Everything ties back here.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `user_id` | UUID | No | The human initiating the query |
+| `user_query` | TEXT | No | Raw input |
+| `structured_query` | JSONB | Yes | Parsed constraints and intent |
+| `plan` | JSONB | Yes | Generated execution steps |
+| `status` | AgentRunStatus | No | Current state |
+| `correction_attempts` | INTEGER | No | Default 0 |
+| `human_approved` | BOOLEAN | Yes | Set during approval phase |
+| `completed_at` | TIMESTAMP | Yes | |
+| *(Audit Cols)* | ... | | `created_at`, `updated_at`, `is_deleted` |
 
-## 2. Relationships & Taxonomy
+### Table: `execution_steps`
+**Purpose**: Tracks each phase of the plan (e.g., Parser -> Search -> Filter -> Ranking).
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `run_id` | UUID | No | FK `agent_runs` |
+| `step_name` | VARCHAR | No | e.g., "Requirement Parser" |
+| `status` | ExecutionStatus | No | |
+| `started_at` | TIMESTAMP | No | |
+| `completed_at` | TIMESTAMP | Yes | |
+| *(Audit Cols)* | ... | | |
 
-### `locations`
-Standardized locations for entities.
-- `id` (UUID, PK)
-- `entity_type` (VARCHAR) - 'business', 'supplier', 'professional', 'project'
-- `entity_id` (UUID, Indexed)
-- `city` (VARCHAR)
-- `state` (VARCHAR)
-- `country` (VARCHAR, Indexed)
-- `latitude` (NUMERIC(9, 6))
-- `longitude` (NUMERIC(9, 6))
+### Table: `tool_calls`
+**Purpose**: Logs deterministic Python function calls (e.g., `search_entities()`).
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `step_id` | UUID | No | FK `execution_steps` |
+| `tool_name` | VARCHAR | No | |
+| `input_args` | JSONB | No | |
+| `output_data` | JSONB | Yes | |
+| `latency_ms` | INTEGER | Yes | |
+| `success` | BOOLEAN | No | |
+| `error_message` | TEXT | Yes | |
+| *(Audit Cols)* | ... | | |
 
-### `products`
-Master catalog of available products.
-- `id` (UUID, PK)
-- `name` (VARCHAR)
-- `category` (VARCHAR, Indexed)
+### Table: `approval_requests`
+**Purpose**: Halts the agent for Human-in-the-Loop authorization.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `run_id` | UUID | No | FK `agent_runs` |
+| `action_type` | VARCHAR | No | e.g., 'DRAFT_EMAIL' |
+| `payload` | JSONB | No | |
+| `status` | ApprovalStatus | No | |
+| `reviewed_by` | UUID | Yes | |
+| `reviewed_at` | TIMESTAMP | Yes | |
+| *(Audit Cols)* | ... | | |
 
-### `supplier_products`
-Linking suppliers to the products they offer.
-- `supplier_id` (UUID, FK -> suppliers.id, PK part 1)
-- `product_id` (UUID, FK -> products.id, PK part 2)
-- `unit_price` (NUMERIC(10, 2))
-- `minimum_order_quantity` (INTEGER)
+---
 
-### `skills`
-Skills associated with professionals.
-- `id` (UUID, PK)
-- `professional_id` (UUID, FK -> professionals.id)
-- `skill_name` (VARCHAR, Indexed)
-- `proficiency_level` (VARCHAR) - 'beginner', 'intermediate', 'expert'
+## Schema: `business`
+Stores the strictly normalized, deterministic enterprise data.
 
-### `certifications`
-Master list of recognized certifications (e.g., ISO 9001, SOC2).
-- `id` (UUID, PK)
-- `name` (VARCHAR, Unique)
-- `issuing_body` (VARCHAR)
+### Enums
+- `EntityStatus`: `ACTIVE`, `INACTIVE`, `BLACKLISTED`
+- `OpportunityStatus`: `OPEN`, `CLOSED`, `EXPIRED`
 
-### `supplier_certifications`
-Linking suppliers to their certifications.
-- `supplier_id` (UUID, FK -> suppliers.id, PK part 1)
-- `certification_id` (UUID, FK -> certifications.id, PK part 2)
-- `issued_date` (DATE)
-- `expiry_date` (DATE, Indexed)
+### Table: `businesses`, `suppliers`, `professionals`
+**Purpose**: Core entities.
+*(Standard audit columns apply to all)*
+- **Notable fields**: `status` (EntityStatus), `name` (VARCHAR), `description` (TEXT), `trusted_notes` (TEXT) - strictly for prompt injection protection (LLM only sees trusted fields).
 
-## 3. Operations & Feedback
+### Table: `supplier_capabilities`
+**Purpose**: Dynamic key-value pairs to prevent rigid schema changes.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `supplier_id` | UUID | No | FK |
+| `capability` | VARCHAR | No | e.g., "Cold Storage" |
+| `value` | VARCHAR | Yes | e.g., "Yes", "-20C" |
+| *(Audit Cols)* | ... | | |
 
-### `projects`
-Internal projects requiring resources.
-- `id` (UUID, PK)
-- `business_id` (UUID, FK -> businesses.id)
-- `name` (VARCHAR)
-- `budget` (NUMERIC(15, 2))
-- `start_date` (DATE)
-- `end_date` (DATE)
-- `status` (VARCHAR)
+### Table: `certifications` & `supplier_certifications`
+**Purpose**: Normalized tracking of ISO, SOC2, etc.
+- `certifications`: `id`, `name`, `type`, `authority`
+- `supplier_certifications`: `supplier_id`, `certification_id`, `issue_date`, `expiry_date` (crucial for validation logic).
 
-### `opportunities`
-External RFPs, bids, or procurement opportunities.
-- `id` (UUID, PK)
-- `title` (VARCHAR)
-- `description` (TEXT)
-- `budget_range_min` (NUMERIC(15,2))
-- `budget_range_max` (NUMERIC(15,2))
-- `deadline` (TIMESTAMP)
-- `status` (VARCHAR) - 'open', 'closed', 'awarded'
+### Table: `products`, `categories`, `supplier_products`
+**Purpose**: Hierarchical taxonomy (Category -> Subcategory) mapped to Suppliers Many-to-Many.
+- `products`: `id`, `name`, `category_id`
+- `categories`: `id`, `name`, `parent_category_id`
+- `supplier_products`: `supplier_id`, `product_id`, `price`, `moq`
 
-### `availability`
-Tracking availability of suppliers or professionals.
-- `id` (UUID, PK)
-- `entity_type` (VARCHAR) - 'supplier', 'professional'
-- `entity_id` (UUID, Indexed)
-- `start_date` (DATE)
-- `end_date` (DATE)
-- `is_available` (BOOLEAN)
+### Table: `availability`
+**Purpose**: Time-based capacity constraints instead of simple booleans.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `entity_id` | UUID | No | Polymorphic |
+| `available_from` | DATE | No | |
+| `available_until` | DATE | Yes | |
+| `lead_time_days` | INTEGER | No | |
+| `monthly_capacity`| INTEGER | No | |
+| *(Audit Cols)* | ... | | |
 
-### `ratings`
-Performance ratings.
-- `id` (UUID, PK)
-- `entity_type` (VARCHAR)
-- `entity_id` (UUID)
-- `score` (NUMERIC(3, 2)) - e.g., 1.00 to 5.00
-- `review_text` (TEXT)
-- `created_at` (TIMESTAMP)
+### Table: `entity_aliases`
+**Purpose**: Resolves "EcoPack" vs "Eco-Pack".
+- `id`, `entity_type`, `entity_id`, `alias`
 
-### `interaction_history`
-Record of past business interactions.
-- `id` (UUID, PK)
-- `entity_a_type` (VARCHAR)
-- `entity_a_id` (UUID)
-- `entity_b_type` (VARCHAR)
-- `entity_b_id` (UUID)
-- `interaction_type` (VARCHAR) - 'contract', 'inquiry', 'meeting'
-- `interaction_date` (TIMESTAMP)
-- `outcome` (VARCHAR)
+---
 
-## 4. Agent Infrastructure (Auditing & Execution)
+## Schema: `analytics`
+Stores validation states, scores, caching, and ML foundations.
 
-### `search_history`
-Logs of natural language queries made by users.
-- `id` (UUID, PK)
-- `user_id` (UUID, FK -> users.id)
-- `query_text` (TEXT)
-- `structured_requirements` (JSONB) - Storing the parsed output from the LLM
-- `created_at` (TIMESTAMP)
+### Table: `match_scores`
+**Purpose**: Persists deterministic scores so the UI can render exact reasoning bars.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `run_id` | UUID | No | FK `agent_runs` |
+| `entity_id` | UUID | No | |
+| `score_relevance` | NUMERIC | No | |
+| `score_constraint`| NUMERIC | No | |
+| `score_location` | NUMERIC | No | |
+| `score_capacity` | NUMERIC | No | |
+| `score_rating` | NUMERIC | No | |
+| `score_total` | NUMERIC | No | |
+| *(Audit Cols)* | ... | | |
 
-### `execution_logs`
-Detailed traces of the agent's planning and execution.
-- `id` (UUID, PK)
-- `search_id` (UUID, FK -> search_history.id)
-- `step_name` (VARCHAR)
-- `status` (VARCHAR) - 'pending', 'success', 'failed'
-- `log_data` (JSONB) - Context and intermediate reasoning
-- `created_at` (TIMESTAMP)
+### Table: `validation_logs`
+**Purpose**: Details exactly why an entity passed or failed constraints.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `run_id` | UUID | No | FK `agent_runs` |
+| `entity_id` | UUID | No | |
+| `is_valid` | BOOLEAN | No | |
+| `failed_constraints` | JSONB | Yes | Fed back to Correction loop |
+| `attempt_number`| INTEGER | No | |
+| *(Audit Cols)* | ... | | |
 
-### `tool_calls`
-Tracking exactly which tools the agent invoked.
-- `id` (UUID, PK)
-- `execution_id` (UUID, FK -> execution_logs.id)
-- `tool_name` (VARCHAR)
-- `arguments` (JSONB)
-- `result` (JSONB)
-- `execution_time_ms` (INTEGER)
-- `created_at` (TIMESTAMP)
+### Table: `search_cache`
+**Purpose**: Speeds up repeated identical queries.
+- `query_hash`, `embedding_hash`, `response_payload`, `expires_at`
 
-### `validation_logs`
-Results of the deterministic validation engine.
-- `id` (UUID, PK)
-- `search_id` (UUID, FK -> search_history.id)
-- `entity_id` (UUID) - The recommended entity
-- `attempt_number` (INTEGER)
-- `is_valid` (BOOLEAN)
-- `failed_constraints` (JSONB) - Which hard constraints were violated
-- `created_at` (TIMESTAMP)
-
-### `approval_requests`
-Requests waiting for Human-in-the-Loop validation.
-- `id` (UUID, PK)
-- `search_id` (UUID, FK -> search_history.id)
-- `action_type` (VARCHAR) - e.g., 'draft_outreach', 'award_contract'
-- `payload` (JSONB) - The proposed email draft or payload
-- `status` (VARCHAR) - 'pending', 'approved', 'rejected', 'modified'
-- `reviewed_by` (UUID, FK -> users.id, Nullable)
-- `reviewed_at` (TIMESTAMP, Nullable)
-- `created_at` (TIMESTAMP)
+### Table: `entity_embeddings` (Future-Proofing)
+**Purpose**: Placeholder for future vector/RAG search.
+- `entity_id`, `entity_type`, `embedding_model`, `embedding_vector` (Vector type)
