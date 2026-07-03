@@ -1,36 +1,27 @@
-# NexusAI Architecture
+# NexusAI Architecture Specification
 
-## High-Level Architecture
-NexusAI is split into three primary tiers:
-1. **Frontend (Next.js 15)**: The user interface.
-2. **Backend (FastAPI)**: The orchestration and tool execution layer.
-3. **Data & AI Layer (PostgreSQL, Redis, Ollama)**: Data persistence, caching, and local inference.
+## Overview
+NexusAI is an enterprise-grade autonomous reasoning engine built with an inside-out, deterministic-first philosophy.
 
-## The Agentic Pipeline
-The backend implements the Agent logic in strict stages:
+## System Components
 
-1. **User Request** -> `Parser Module` -> Structured JSON (Constraints, Entity, Goal)
-2. **Planner Module** -> Identifies required tools and sequence.
-3. **Tool Executor** -> Invokes Python tools (e.g., `search_entities()`).
-4. **Database (PostgreSQL)** -> Returns deterministic, real data via SQLAlchemy.
-5. **Scorer Module** -> Ranks results deterministically (not by LLM).
-6. **Validator Module** -> Cross-checks results against the structured JSON constraints.
-   - *If invalid*: Feeds failure reason back to Planner -> Retries (Max 3).
-   - *If valid*: Proceeds.
-7. **Outreach/Action Drafter (LLM)** -> Prepares the final summary and proposed action (e.g., draft email).
-8. **Human Approval** -> Pauses execution until frontend confirms the action.
+### 1. Frontend (Next.js 15)
+- **Framework**: Next.js App Router (React 19)
+- **Styling**: Tailwind CSS v4
+- **State**: Server Components with Client-side routing.
 
-## Tool Isolation Architecture
-The LLM never generates SQL. It outputs JSON tool calls. The FastAPI backend maps these JSON calls to strictly typed Python functions that use SQLAlchemy repositories.
+### 2. Backend (FastAPI + SQLAlchemy)
+- **Framework**: FastAPI (Async)
+- **ORM**: SQLAlchemy 2.0
+- **Database**: PostgreSQL with Multi-Schema (`business`, `agent`, `analytics`)
+- **Validation**: Strict Pydantic models with custom constraint validation.
 
-```
-[LLM (Qwen3)] <--- JSON (Tool Name + Args) ---> [Tool Router] <---> [Python Repository] <---> [PostgreSQL]
-```
+### 3. Intelligence Layer (Ollama)
+- **Provider**: Local Ollama (Qwen2.5)
+- **Contracts**: Strict JSON schemas using Pydantic.
+- **Workflow**: Parser -> Planner -> Executor -> Validator -> Formatter.
+- **Safety**: The LLM acts purely as a reasoning engine. It cannot execute raw SQL or arbitrary code. All tools are registered dynamically and validated via `AgentValidator`.
 
-## Deployment
-Docker Compose manages the full stack. The `docker-compose.yml` spins up:
-- `frontend` (Port 3000)
-- `backend` (Port 8000)
-- `db` (Port 5432)
-- `redis` (Port 6379)
-- `ollama` (Port 11434)
+### 4. Infrastructure
+- **Orchestration**: Docker Compose
+- **Services**: Backend, Frontend, Postgres, Redis, Ollama.
