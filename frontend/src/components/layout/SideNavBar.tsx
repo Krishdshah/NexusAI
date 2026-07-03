@@ -7,7 +7,7 @@ export default function SideNavBar() {
   const pathname = usePathname();
 
   const links = [
-    { name: "Dashboard", href: "/", icon: "dashboard" },
+    { name: "Dashboard", href: "/dashboard", icon: "dashboard" },
     { name: "AI Agent", href: "/agent", icon: "smart_toy" },
     { name: "Execution History", href: "/history", icon: "history" },
     { name: "Dataset Explorer", href: "/explorer", icon: "database" },
