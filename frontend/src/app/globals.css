@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-tertiary-fixed-dim: #4cd7f6;
+  --color-surface-container-high: #282a2b;
+  --color-on-error-container: #ffdad6;
+  --color-on-secondary-fixed: #2c0051;
+  --color-secondary-fixed-dim: #ddb7ff;
+  --color-on-tertiary-container: #002f38;
+  --color-surface-bright: #38393a;
+  --color-on-primary: #1000a9;
+  --color-on-background: #e2e2e2;
+  --color-inverse-primary: #494bd6;
+  --color-inverse-on-surface: #2f3131;
+  --color-on-primary-fixed: #07006c;
+  --color-error-container: #93000a;
+  --color-surface: #121414;
+  --color-inverse-surface: #e2e2e2;
+  --color-secondary-fixed: #f0dbff;
+  --color-on-tertiary: #003640;
+  --color-tertiary-container: #009eb9;
+  --color-primary-fixed: #e1e0ff;
+  --color-background: #121414;
+  --color-surface-container: #1e2020;
+  --color-on-error: #690005;
+  --color-surface-container-low: #1a1c1c;
+  --color-secondary: #ddb7ff;
+  --color-on-primary-container: #0d0096;
+  --color-surface-container-lowest: #0c0f0f;
+  --color-outline: #908fa0;
+  --color-on-primary-fixed-variant: #2f2ebe;
+  --color-on-tertiary-fixed: #001f26;
+  --color-on-tertiary-fixed-variant: #004e5c;
+  --color-surface-dim: #121414;
+  --color-tertiary: #4cd7f6;
+  --color-primary-container: #8083ff;
+  --color-primary: #c0c1ff;
+  --color-tertiary-fixed: #acedff;
+  --color-surface-container-highest: #333535;
+  --color-secondary-container: #6f00be;
+  --color-on-surface: #e2e2e2;
+  --color-surface-tint: #c0c1ff;
+  --color-on-secondary-fixed-variant: #6900b3;
+  --color-surface-variant: #333535;
+  --color-outline-variant: #464554;
+  --color-error: #ffb4ab;
+  --color-primary-fixed-dim: #c0c1ff;
+  --color-on-secondary: #490080;
+  --color-on-secondary-container: #d6a9ff;
+  --color-on-surface-variant: #c7c4d7;
+
+  --spacing-margin-mobile: 16px;
+  --spacing-unit: 4px;
+  --spacing-margin-desktop: 48px;
+  --spacing-gutter: 24px;
+  --spacing-container-max: 1440px;
+
+  --font-code-sm: "JetBrains Mono";
+  --font-body-base: "Inter";
+  --font-label-caps: "Inter";
+  --font-display-lg: "Geist";
+  --font-headline-md: "Geist";
+  --font-display-lg-mobile: "Geist";
+  --font-body-sm: "Inter";
+}
+
+@layer base {
+  body {
+    background-color: #09090B;
+    color: #e2e2e2;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .glass-panel {
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid #27272A;
+  }
+  .glow-border:hover {
+    border-color: #494bd6;
+    box-shadow: 0 0 20px rgba(73, 75, 214, 0.15);
+  }
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+  .blob-bg {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(73, 75, 214, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(80px);
+    z-index: -1;
+    animation: move 20s infinite alternate;
+  }
+}
+
+@keyframes move {
+  from { transform: translate(-10%, -10%); }
+  to { transform: translate(20%, 20%); }
+}

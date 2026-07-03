@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexusAI | Enterprise Business Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@450&amp;family=Geist:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#4cd7f6",
+                    "surface-container-high": "#282a2b",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed": "#2c0051",
+                    "secondary-fixed-dim": "#ddb7ff",
+                    "on-tertiary-container": "#002f38",
+                    "surface-bright": "#38393a",
+                    "on-primary": "#1000a9",
+                    "on-background": "#e2e2e2",
+                    "inverse-primary": "#494bd6",
+                    "inverse-on-surface": "#2f3131",
+                    "on-primary-fixed": "#07006c",
+                    "error-container": "#93000a",
+                    "surface": "#121414",
+                    "inverse-surface": "#e2e2e2",
+                    "secondary-fixed": "#f0dbff",
+                    "on-tertiary": "#003640",
+                    "tertiary-container": "#009eb9",
+                    "primary-fixed": "#e1e0ff",
+                    "background": "#121414",
+                    "surface-container": "#1e2020",
+                    "on-error": "#690005",
+                    "surface-container-low": "#1a1c1c",
+                    "secondary": "#ddb7ff",
+                    "on-primary-container": "#0d0096",
+                    "surface-container-lowest": "#0c0f0f",
+                    "outline": "#908fa0",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "on-tertiary-fixed": "#001f26",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "surface-dim": "#121414",
+                    "tertiary": "#4cd7f6",
+                    "primary-container": "#8083ff",
+                    "primary": "#c0c1ff",
+                    "tertiary-fixed": "#acedff",
+                    "surface-container-highest": "#333535",
+                    "secondary-container": "#6f00be",
+                    "on-surface": "#e2e2e2",
+                    "surface-tint": "#c0c1ff",
+                    "on-secondary-fixed-variant": "#6900b3",
+                    "surface-variant": "#333535",
+                    "outline-variant": "#464554",
+                    "error": "#ffb4ab",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "on-secondary": "#490080",
+                    "on-secondary-container": "#d6a9ff",
+                    "on-surface-variant": "#c7c4d7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "margin-desktop": "48px",
+                    "gutter": "24px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "code-sm": ["JetBrains Mono"],
+                    "body-base": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "display-lg": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "display-lg-mobile": ["Geist"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "code-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "450"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #09090B;
+            color: #e2e2e2;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(144, 143, 160, 0.2);
+        }
+        .glow-border:hover {
+            border-color: rgba(73, 75, 214, 0.5);
+            box-shadow: 0 0 25px rgba(73, 75, 214, 0.2), inset 0 0 15px rgba(73, 75, 214, 0.05);
+        }
+        .hover-lift {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-8px);
+        }
+        .animate-entrance {
+            animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes entrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        webgl-shader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-body-base text-body-base">
+<!-- Background Shader -->
+
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface-container-low/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
+<div class="flex items-center gap-gutter">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">NexusAI</span>
+<div class="hidden md:flex gap-6 items-center ml-12">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary py-1" href="#">Dashboard</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Explorer</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Reports</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings_brightness</span>
+</button>
+<button class="flex items-center gap-2 pl-2 pr-1 py-1 bg-surface-variant rounded-full border border-outline-variant">
+<span class="font-label-caps text-label-caps px-2">Account</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 flex flex-col pt-20 pb-8 px-4 bg-surface-container/60 backdrop-blur-xl border-r border-outline-variant/30 hidden md:flex">
+<div class="flex-1 flex flex-col gap-1">
+<div class="px-3 mb-4">
+<p class="font-label-caps text-label-caps text-outline uppercase tracking-widest text-[10px]">Discovery Shell</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg font-bold translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-caps text-label-caps">AI Agent</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">Execution History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Dataset Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-label-caps text-label-caps">Validation Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-label-caps">Approvals</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto border-t border-outline-variant/30 pt-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="md:ml-64 pt-16 min-h-screen relative z-10 flex flex-col items-center">
+<!-- Hero Section -->
+<section class="w-full max-w-5xl px-margin-mobile md:px-gutter py-12 md:py-24 text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6 animate-entrance" style="animation-delay: 0.1s;">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-code-sm text-code-sm text-primary uppercase tracking-wider">Enterprise Discovery Engine v2.4</span>
+</div>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-8 tracking-tight animate-entrance" style="animation-delay: 0.2s;">
+            Enterprise Business <br class="hidden md:block"/> <span class="bg-gradient-to-r from-primary to-tertiary text-transparent bg-clip-text">Discovery Agent</span>
+</h1>
+<div class="max-w-2xl mx-auto relative group animate-entrance" style="animation-delay: 0.3s;">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition duration-500"></div>
+<div class="relative flex items-center bg-[#09090B]/90 border border-outline-variant/50 rounded-2xl px-6 py-4 backdrop-blur-sm">
+<span class="material-symbols-outlined text-outline mr-4">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-base placeholder-on-surface-variant" placeholder="What are you looking for today?" type="text"/>
+<button class="ml-4 px-6 py-2 bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container rounded-xl font-label-caps text-label-caps hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                    Discover
+                </button>
+</div>
+</div>
+<!-- Quick Action Chips -->
+<div class="flex flex-wrap justify-center gap-3 mt-8 animate-entrance" style="animation-delay: 0.4s;">
+<button class="px-4 py-2 glass-panel rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary hover:border-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">factory</span> Find Suppliers
+            </button>
+<button class="px-4 py-2 glass-panel rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary hover:border-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">person_search</span> Search Professionals
+            </button>
+<button class="px-4 py-2 glass-panel rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary hover:border-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">query_stats</span> Market Trends
+            </button>
+<button class="px-4 py-2 glass-panel rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary hover:border-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified_user</span> Compliance Check
+            </button>
+</div>
+</section>
+<!-- Content Grid -->
+<section class="w-full max-w-7xl px-margin-mobile md:px-margin-desktop py-12">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Recent Searches (Left Col) -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recent Activity</h2>
+<button class="text-primary font-label-caps text-label-caps hover:underline">View All</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Activity Card 1 -->
+<div class="p-4 glass-panel rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group border border-outline-variant/20">
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">history</span>
+</div>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm font-semibold text-on-surface">"Eco-friendly supply chain partners in Nordics"</p>
+<p class="font-label-caps text-[10px] text-outline mt-1 uppercase tracking-tighter">Searched 2h ago • 14 results</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Activity Card 2 -->
+<div class="p-4 glass-panel rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group border border-outline-variant/20">
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm font-semibold text-on-surface">Compliance Report: Vertex Global</p>
+<p class="font-label-caps text-[10px] text-outline mt-1 uppercase tracking-tighter">Generated yesterday • Verified</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-tertiary opacity-0 group-hover:opacity-100 transition-all">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Activity Card 3 -->
+<div class="p-4 glass-panel rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group border border-outline-variant/20">
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">dataset</span>
+</div>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm font-semibold text-on-surface">Export: Q3 Logistics Analysis</p>
+<p class="font-label-caps text-[10px] text-outline mt-1 uppercase tracking-tighter">Completed Oct 12 • 4.2 MB</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-secondary opacity-0 group-hover:opacity-100 transition-all">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommended (Right Col) -->
+<div class="md:col-span-8 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recommended for You</h2>
+<span class="font-code-sm text-code-sm text-outline">Refining based on your profile</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Recommendation Card 1 -->
+<div class="hover-lift glow-border glass-panel rounded-2xl overflow-hidden group cursor-pointer border border-outline-variant/40 flex flex-col h-full">
+<div class="h-40 bg-surface-container-highest relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" data-alt="Futuristic professional business environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIwMlYmn83A-0X5HZ0Sq1hxst8RLRK4pr4sxwczFMn-8Zc451yihUI99IrWWyaIGTykMuJAhKWTmLN_iDoQ4V84CygpG6gNUy-39UJkrlViJxrNKXp02sl-4sJ4Zh1fUvNd2AAKLigCVj63rJNHZpppQ6Gv2HaKTxyPpgwczYRCUBI9W9rJkgLxACvQjUIhmdgE7xOHlkkUEl4RK3Q2K1BI_NmDHw6-drQkZ1-Q-fz_fy6hxUPtds3JvayaDM18yAkEFPI01UKOjs"/>
+<div class="absolute top-4 right-4 px-2 py-1 rounded-md bg-background/80 backdrop-blur-md border border-outline-variant/30">
+<span class="font-code-sm text-[11px] text-tertiary">98% Match</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">AI Recommendation</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Sustainable Logistics Partners</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex-1">Based on your recent interest in ESG reporting, we've identified 12 pre-vetted partners matching your criteria.</p>
+<div class="mt-6 flex items-center justify-between">
+<button class="font-label-caps text-label-caps text-primary group-hover:text-tertiary transition-colors flex items-center gap-2">
+                                    Explore List <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">trending_flat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Recommendation Card 2 -->
+<div class="hover-lift glow-border glass-panel rounded-2xl overflow-hidden group cursor-pointer border border-outline-variant/40 flex flex-col h-full">
+<div class="h-40 bg-surface-container-highest relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" data-alt="Abstract global data network visualization" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9iMr1bZVZLV4RZjbG4RfvC8CNhyD-zmzX2CuqUwtNEfS8HecchqyDwCGgcMqPjoRpKqCr-jJ3Dsk0fTPAYTb2XWSXzN1fLefuahXXs8WIJCo0cgK3zJ34qREtCywtnnyey9y5cuYEa9p2Ac2RX8-UzTR6sTAKPpDNr45yMSuC0nUjkoV4sVcb5Mo_Hq9-_rI2Biw1YRCW4e24DfRzraQc8xTven-LduIccxcgV9DKop7LO5iR0C7-KL8QX06zSXgmt7YSUYIQgtU"/>
+<div class="absolute top-4 right-4 px-2 py-1 rounded-md bg-background/80 backdrop-blur-md border border-outline-variant/30">
+<span class="font-code-sm text-[11px] text-secondary">New Insight</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-caps text-label-caps text-outline uppercase">Market Analysis</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Emerging Tech Hubs 2024</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex-1">New discovery pattern detected: Tech talent migration toward secondary European hubs. View the impact report.</p>
+<div class="mt-6 flex items-center justify-between">
+<button class="font-label-caps text-label-caps text-primary group-hover:text-tertiary transition-colors flex items-center gap-2">
+                                    Open Report <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">trending_flat</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<script>
+    /**
+     * WebGL Shader Component
+     * Renders the provided GLSL animation as a background
+     */
+    class WebGLShader extends HTMLElement {
+        constructor() {
+            super();
+            this.canvas = document.createElement('canvas');
+            this.appendChild(this.canvas);
+            this.gl = this.canvas.getContext('webgl');
+            this.startTime = Date.now();
+        }
+
+        connectedCallback() {
+            this.init();
+            this.animate();
+            window.addEventListener('resize', () => this.resize());
+            this.resize();
+        }
+
+        init() {
+            const gl = this.gl;
+            const fragmentSource = this.querySelector('script[type="x-shader/x-fragment"]').textContent;
+            const vertexSource = `
+                attribute vec2 position;
+                varying vec2 v_texCoord;
+                void main() {
+                    v_texCoord = position * 0.5 + 0.5;
+                    v_texCoord.y = 1.0 - v_texCoord.y;
+                    gl_Position = vec4(position, 0.0, 1.0);
+                }
+            `;
+
+            const createShader = (gl, type, source) => {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                return shader;
+            };
+
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+
+            this.program = gl.createProgram();
+            gl.attachShader(this.program, vertexShader);
+            gl.attachShader(this.program, fragmentShader);
+            gl.linkProgram(this.program);
+            gl.useProgram(this.program);
+
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+
+            const positionLocation = gl.getAttribLocation(this.program, "position");
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            this.timeLocation = gl.getUniformLocation(this.program, "u_time");
+            this.resolutionLocation = gl.getUniformLocation(this.program, "u_resolution");
+        }
+
+        resize() {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        }
+
+        animate() {
+            const time = (Date.now() - this.startTime) / 1000;
+            this.gl.uniform1f(this.timeLocation, time);
+            this.gl.uniform2f(this.resolutionLocation, this.canvas.width, this.canvas.height);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(() => this.animate());
+        }
+    }
+
+    customElements.define('webgl-shader', WebGLShader);
+</script>
+</body></html>
