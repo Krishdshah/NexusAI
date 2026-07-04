@@ -18,7 +18,7 @@ export default function SideNavBar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 z-40 flex-col pt-20 pb-8 px-4 bg-surface-container border-r border-outline-variant hidden md:flex">
+    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 z-40 flex-col pt-4 pb-8 px-4 bg-surface-container border-r border-outline-variant hidden md:flex">
       <div className="flex-1 flex flex-col gap-1">
         <div className="px-3 mb-4">
           <p className="font-label-caps text-[10px] text-outline uppercase tracking-widest">Discovery Shell</p>
