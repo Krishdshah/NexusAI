@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any, Dict, Optional
 import httpx
 from .client import LLMClient
@@ -8,9 +9,9 @@ class OllamaProvider(LLMClient):
     Production-grade Ollama integration.
     Connects to the locally running NexusAI Agent (Qwen2.5) via Ollama.
     """
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "nexus-agent"):
+    def __init__(self, base_url: str = "http://localhost:11434", model: str = "qwen"):
         self.base_url = base_url
-        self.model = model
+        self.model = os.getenv("OLLAMA_MODEL", model)
         self.generate_endpoint = f"{self.base_url}/api/generate"
 
     async def generate_json(self, prompt: str, schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -40,6 +41,23 @@ class OllamaProvider(LLMClient):
                 # Fallback mechanism if the model hallucinated markdown wrapping
                 cleaned = raw_response.strip("`").replace("json\n", "").strip()
                 return json.loads(cleaned)
+
+    async def generate_text(self, prompt: str) -> str:
+        """
+        Sends a prompt to the Ollama model and returns plain text.
+        """
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": False,
+        }
+
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(self.generate_endpoint, json=payload)
+            response.raise_for_status()
+            
+            data = response.json()
+            return data.get("response", "")
 
     async def health_check(self) -> bool:
         """
