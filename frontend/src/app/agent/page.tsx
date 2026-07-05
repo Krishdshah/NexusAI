@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, Paperclip, Terminal, CheckCircle2, CircleDashed, Clock, ChevronRight } from "lucide-react";
@@ -14,7 +14,7 @@ interface Session {
   status: string;
 }
 
-export default function AIAgentWorkspace() {
+function AIAgentWorkspaceContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams?.get("query") || "";
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -256,5 +256,13 @@ export default function AIAgentWorkspace() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function AIAgentWorkspace() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-white">Loading...</div>}>
+      <AIAgentWorkspaceContent />
+    </Suspense>
   );
 }
