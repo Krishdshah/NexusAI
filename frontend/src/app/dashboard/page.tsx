@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Sparkles, Building2, TrendingUp, Users, ArrowRight } from "lucide-react";
+import { Search, Sparkles, Building2, TrendingUp, Users, ArrowRight, History } from "lucide-react";
 
 export default function Dashboard() {
   const [query, setQuery] = useState("");
