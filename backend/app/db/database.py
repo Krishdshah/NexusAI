@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
-    "postgresql+asyncpg://nexus:nexuspassword@localhost:5432/nexusai"
+    "postgresql+asyncpg://nexus_admin:nexus_password@localhost:5432/nexus_db"
 )
 
 engine = create_async_engine(

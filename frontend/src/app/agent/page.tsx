@@ -5,7 +5,7 @@ import TopNavBar from "@/components/layout/TopNavBar";
 import SideNavBar from "@/components/layout/SideNavBar";
 
 interface Session {
-  id: str;
+  id: string;
   query: string;
   created_at: string;
   status: string;

@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Text, Boolean, DateTime
+from sqlalchemy import String, Integer, Text, Boolean, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 import uuid
@@ -13,7 +13,11 @@ class AgentRun(Base):
     user_query: Mapped[str] = mapped_column(Text, nullable=False)
     structured_query: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     plan: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    status: Mapped[AgentRunStatus] = mapped_column(default=AgentRunStatus.RUNNING, nullable=False)
+    status: Mapped[AgentRunStatus] = mapped_column(
+        Enum(AgentRunStatus, native_enum=False, length=50), 
+        default=AgentRunStatus.RUNNING, 
+        nullable=False
+    )
     correction_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     human_approved: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     completed_at: Mapped[str | None] = mapped_column(DateTime, nullable=True)

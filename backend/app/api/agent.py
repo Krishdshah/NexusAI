@@ -9,9 +9,11 @@ from app.llm.ollama import OllamaProvider
 import uuid
 import json
 
-router = APIRouter()
-llm = OllamaProvider(base_url="http://ollama:11434")
+import os
 
+router = APIRouter()
+ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+llm = OllamaProvider(base_url=ollama_host)
 @router.post("/chat")
 async def chat_with_agent(query: str, db: AsyncSession = Depends(get_db)):
     # Create Agent Run

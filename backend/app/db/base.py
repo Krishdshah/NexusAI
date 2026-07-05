@@ -19,7 +19,7 @@ metadata = MetaData(naming_convention=convention)
 
 
 def utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Base(DeclarativeBase):
