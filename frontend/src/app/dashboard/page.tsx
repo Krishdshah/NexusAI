@@ -1,7 +1,26 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import TopNavBar from "@/components/layout/TopNavBar";
 import SideNavBar from "@/components/layout/SideNavBar";
 
 export default function Dashboard() {
+  const [query, setQuery] = useState("");
+  const router = useRouter();
+
+  const handleDiscover = () => {
+    if (query.trim()) {
+      router.push(`/agent?query=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleDiscover();
+    }
+  };
+
   return (
     <>
       <TopNavBar />
@@ -19,8 +38,18 @@ export default function Dashboard() {
             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition duration-500"></div>
             <div className="relative flex items-center bg-[#09090B] border border-outline-variant rounded-2xl px-6 py-4">
               <span className="material-symbols-outlined text-outline mr-4">search</span>
-              <input className="bg-transparent border-none focus:outline-none w-full text-body-base placeholder-on-surface-variant" placeholder="What are you looking for today?" type="text"/>
-              <button className="ml-4 px-6 py-2 bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container rounded-xl font-label-caps text-[12px] font-bold hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer">
+              <input 
+                className="bg-transparent border-none focus:outline-none w-full text-body-base placeholder-on-surface-variant" 
+                placeholder="What are you looking for today?" 
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button 
+                onClick={handleDiscover}
+                className="ml-4 px-6 py-2 bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container rounded-xl font-label-caps text-[12px] font-bold hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 cursor-pointer"
+              >
                 Discover
               </button>
             </div>
