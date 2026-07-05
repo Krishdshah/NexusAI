@@ -1,0 +1,11 @@
+id,name,industry,type,location,description,contact,status
+1,Northside General Pharmacy,Healthcare,Pharmacy,North Region,Providing complete pharmaceutical care and consultation.,contact@northsidepharm.com,ACTIVE
+2,Apex Surgical Center,Healthcare,Surgeon,West Region,Specialized in minimally invasive outpatient surgeries.,info@apexsurgery.com,ACTIVE
+3,SmileBright Dental,Healthcare,Dentist,East Region,Comprehensive dental care for families and individuals.,hello@smilebright.com,ACTIVE
+4,City Center Drugstore,Healthcare,Pharmacy,Central,24/7 drugstore and prescription services.,support@citydrugstore.com,ACTIVE
+5,Orthopedic Masters,Healthcare,Surgeon,North Region,Expert orthopedic surgeons for joint replacement.,consult@orthomasters.com,ACTIVE
+6,Gentle Care Dentistry,Healthcare,Dentist,West Region,Painless dentistry focusing on pediatric care.,pediatric@gentlecare.com,ACTIVE
+7,Wellness Pharmacy Plus,Healthcare,Pharmacy,East Region,Holistic health supplements and prescription medicines.,wellness@pharmacyplus.com,ACTIVE
+8,CardioVascular Surgery Associates,Healthcare,Surgeon,Central,Advanced heart and vascular surgical interventions.,cardio@cvassociates.com,ACTIVE
+9,Pearl White Dental Spa,Healthcare,Dentist,North Region,Cosmetic dentistry and teeth whitening spa.,appointments@pearlwhite.com,ACTIVE
+10,Neighborhood Health Pharmacy,Healthcare,Pharmacy,West Region,Local community pharmacy with personalized service.,local@neighborhoodhealth.com,ACTIVE
