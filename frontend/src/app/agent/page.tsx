@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bot, Send, Paperclip, Terminal, CheckCircle2, CircleDashed, Clock, ChevronRight } from "lucide-react";
 import TopNavBar from "@/components/layout/TopNavBar";
 import SideNavBar from "@/components/layout/SideNavBar";
 
@@ -23,13 +25,14 @@ export default function AIAgentWorkspace() {
   
   // Dynamic Inspector States
   const [inspectorSteps, setInspectorSteps] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
   
   const processSteps = [
-    "Analyzing query intent...",
-    "Retrieving schema contexts...",
-    "Synthesizing logical plan...",
-    "Engaging LLM generation...",
-    "Validating output..."
+    "Analyzing query intent & constraints",
+    "Retrieving schema contexts from DB",
+    "Synthesizing logical validation plan",
+    "Engaging Nexus LLM generation",
+    "Validating output against safety constraints"
   ];
 
   useEffect(() => {
@@ -38,6 +41,12 @@ export default function AIAgentWorkspace() {
       handleRunQuery(initialQuery);
     }
   }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, inspectorSteps]);
 
   const fetchSessions = async () => {
     try {
@@ -57,7 +66,6 @@ export default function AIAgentWorkspace() {
     setLoading(true);
     setInspectorSteps([]);
 
-    // Simulate stepping logic
     let stepIndex = 0;
     const interval = setInterval(() => {
       if (stepIndex < processSteps.length) {
@@ -74,7 +82,7 @@ export default function AIAgentWorkspace() {
       });
       const data = await res.json();
       clearInterval(interval);
-      setInspectorSteps(processSteps); // Ensure all steps are shown
+      setInspectorSteps(processSteps);
       setChatHistory(prev => [...prev, { role: "agent", content: data.response }]);
       fetchSessions();
     } catch (e) {
@@ -92,119 +100,158 @@ export default function AIAgentWorkspace() {
     <>
       <TopNavBar />
       <SideNavBar />
-      <main className="md:ml-64 pt-16 min-h-screen flex text-sm">
+      <main className="md:ml-[280px] pt-16 min-h-screen flex text-sm overflow-hidden bg-background">
         {/* Left Panel: Recent Sessions */}
-        <div className="w-1/4 border-r border-outline-variant p-4 flex flex-col gap-4 hidden lg:flex">
-          <h2 className="font-label-caps text-xs text-outline uppercase">Recent Sessions</h2>
+        <div className="w-[300px] border-r border-white/5 p-6 flex flex-col gap-4 hidden lg:flex bg-[#09090b]/50">
+          <h2 className="font-label-caps text-[11px] text-muted uppercase tracking-widest font-semibold mb-2">History</h2>
           {sessions.length === 0 ? (
-            <p className="text-xs text-outline">No sessions found.</p>
+            <p className="text-xs text-muted">No recent sessions.</p>
           ) : (
             sessions.map(s => (
-              <div key={s.id} className="p-4 bg-surface-container-highest rounded-xl cursor-pointer hover:bg-surface-variant transition-colors">
-                <h3 className="text-on-surface font-semibold mb-1 truncate">{s.query}</h3>
-                <p className="text-xs text-outline">{new Date(s.created_at).toLocaleString()} • {s.status}</p>
+              <div key={s.id} className="p-4 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 border border-white/5 transition-all">
+                <h3 className="text-white font-medium mb-1 truncate text-sm">{s.query}</h3>
+                <p className="text-[11px] text-muted flex items-center gap-1">
+                  <Clock size={10}/> {new Date(s.created_at).toLocaleString()}
+                </p>
               </div>
             ))
           )}
         </div>
 
         {/* Center Panel: Chat Interface */}
-        <div className="flex-1 flex flex-col border-r border-outline-variant relative">
-          <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 ${loading ? 'bg-tertiary animate-pulse' : 'bg-primary'} rounded-full`}></span>
-              <span className="text-on-surface font-semibold">Active Session: {activeQuery}</span>
+        <div className="flex-1 flex flex-col relative h-[calc(100vh-4rem)]">
+          <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-md z-10">
+            <div className="flex items-center gap-3">
+              <span className={`w-2 h-2 ${loading ? 'bg-cyan-400 animate-pulse' : 'bg-primary'} rounded-full shadow-[0_0_8px_rgba(79,124,255,0.8)]`}></span>
+              <span className="text-white font-medium text-sm">Active Session: {activeQuery}</span>
             </div>
           </div>
-          <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-6">
-            {chatHistory.map((msg, idx) => (
-              msg.role === "user" ? (
-                <div key={idx} className="self-end bg-surface-container-highest p-4 rounded-xl max-w-[80%] border border-outline-variant">
-                  <p className="text-on-surface">{msg.content}</p>
-                </div>
-              ) : (
-                <div key={idx} className="self-start flex gap-4 max-w-[80%]">
-                  <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary mt-1 shrink-0">
-                    <span className="material-symbols-outlined text-sm">smart_toy</span>
+          
+          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto flex flex-col gap-6 scroll-smooth">
+            <AnimatePresence>
+              {chatHistory.map((msg, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={msg.role === "user" ? "self-end max-w-[80%]" : "self-start flex gap-4 max-w-[85%]"}
+                >
+                  {msg.role === "agent" && (
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/50 flex items-center justify-center text-primary mt-1 shrink-0">
+                      <Bot size={16} />
+                    </div>
+                  )}
+                  <div className={`p-5 rounded-2xl border ${msg.role === "user" ? 'bg-white/10 border-white/10 text-white rounded-br-sm' : 'glass-panel text-white rounded-bl-sm'}`}>
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                   </div>
-                  <div className="bg-surface-container p-4 rounded-xl border border-outline-variant flex-1 whitespace-pre-wrap">
-                    <p className="text-on-surface">{msg.content}</p>
+                </motion.div>
+              ))}
+              {loading && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="self-start flex gap-4 max-w-[80%]"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/50 flex items-center justify-center text-primary mt-1 shrink-0">
+                    <Bot size={16} />
                   </div>
-                </div>
-              )
-            ))}
-            {loading && (
-              <div className="self-start flex gap-4 max-w-[80%]">
-                <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary mt-1 shrink-0">
-                  <span className="material-symbols-outlined text-sm">smart_toy</span>
-                </div>
-                <div className="bg-surface-container p-4 rounded-xl border border-tertiary/50 flex-1">
-                  <div className="flex gap-1 items-center h-full">
-                    <span className="w-2 h-2 bg-tertiary rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-tertiary rounded-full animate-bounce" style={{animationDelay: '100ms'}}></span>
-                    <span className="w-2 h-2 bg-tertiary rounded-full animate-bounce" style={{animationDelay: '200ms'}}></span>
+                  <div className="glass-panel p-5 rounded-2xl rounded-bl-sm flex items-center gap-2">
+                    <div className="flex gap-1.5 items-center">
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce"></span>
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                      <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <div className="p-4 bg-surface-container">
-            <div className="relative flex items-center bg-[#09090B] border border-outline-variant rounded-xl p-2 pr-4">
+          
+          <div className="p-6 bg-gradient-to-t from-background via-background to-transparent pt-12">
+            <div className="relative flex items-center glass-panel rounded-2xl p-2 pr-4 shadow-2xl">
               <input 
-                className="bg-transparent border-none focus:outline-none w-full text-body-base placeholder-on-surface-variant px-4 py-2" 
-                placeholder="Ask NexusAI to analyze, discover, or report..." 
+                className="bg-transparent border-none focus:outline-none w-full text-white placeholder-muted px-4 py-3" 
+                placeholder="Message NexusAI..." 
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleRun()}
                 disabled={loading}
               />
-              <button className="material-symbols-outlined text-outline hover:text-on-surface mx-2">attach_file</button>
+              <button className="p-2 text-muted hover:text-white transition-colors rounded-lg hover:bg-white/10">
+                <Paperclip size={18} />
+              </button>
               <button 
                 onClick={handleRun}
                 disabled={loading}
-                className={`px-6 py-2 ${loading ? 'bg-surface-variant text-outline' : 'bg-primary text-on-primary'} rounded-lg font-bold flex items-center gap-2 hover:opacity-90`}
+                className={`ml-2 px-4 py-2 ${loading ? 'bg-white/10 text-muted cursor-not-allowed' : 'bg-white text-black hover:bg-white/90'} rounded-xl font-bold flex items-center gap-2 transition-all`}
               >
-                <span className="material-symbols-outlined text-sm">send</span> {loading ? 'RUNNING' : 'RUN'}
+                <Send size={16} /> {loading ? 'Thinking' : 'Send'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Panel: Execution Inspector (Dynamic Simulation) */}
-        <div className="w-[30%] bg-surface-container p-6 flex flex-col gap-6 hidden xl:flex">
-          <h2 className="font-headline-md text-lg text-on-surface font-semibold">Execution Inspector</h2>
-          <p className="text-xs text-outline uppercase tracking-wider mb-2">Real-Time Logic Visualization</p>
+        {/* Right Panel: Execution Inspector */}
+        <div className="w-[420px] border-l border-white/5 flex flex-col hidden xl:flex bg-[#09090b]/50 h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="p-6 border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-10">
+            <h2 className="font-display-lg text-lg text-white font-bold flex items-center gap-2">
+              <Terminal size={18} className="text-primary"/> Execution Inspector
+            </h2>
+            <p className="text-[11px] text-muted mt-1 uppercase tracking-widest font-semibold">Real-Time Event Logs</p>
+          </div>
           
-          <div className="flex flex-col gap-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant before:to-transparent">
-            {inspectorSteps.length > 0 ? (
-              inspectorSteps.map((step, idx) => (
-                <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 ${loading && idx === inspectorSteps.length - 1 ? 'border-tertiary bg-background text-tertiary shadow' : 'border-primary bg-primary text-on-primary'} shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
-                    {loading && idx === inspectorSteps.length - 1 ? (
-                      <div className="w-2 h-2 bg-tertiary rounded-full animate-ping"></div>
-                    ) : (
-                      <span className="material-symbols-outlined text-[12px]">check</span>
-                    )}
+          <div className="p-6">
+            <div className="relative border-l-2 border-white/10 ml-3 space-y-8">
+              <AnimatePresence>
+                {inspectorSteps.length > 0 ? (
+                  inspectorSteps.map((step, idx) => {
+                    const isLast = idx === inspectorSteps.length - 1;
+                    const isActive = loading && isLast;
+                    return (
+                      <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="relative pl-6"
+                      >
+                        <div className={`absolute -left-[11px] top-1 w-5 h-5 rounded-full flex items-center justify-center bg-background border-2 ${isActive ? 'border-primary' : 'border-green-500'}`}>
+                          {isActive ? (
+                            <CircleDashed size={12} className="text-primary animate-spin" />
+                          ) : (
+                            <CheckCircle2 size={12} className="text-green-500" />
+                          )}
+                        </div>
+                        
+                        <div className={`p-4 rounded-xl border ${isActive ? 'bg-primary/5 border-primary/30' : 'bg-white/5 border-white/10'} transition-all`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-[10px] font-code-sm font-bold uppercase tracking-widest ${isActive ? 'text-primary' : 'text-green-400'}`}>
+                              {isActive ? 'Processing' : 'Completed'}
+                            </span>
+                            {!isActive && <span className="text-[10px] font-code-sm text-muted">24ms</span>}
+                          </div>
+                          <p className="text-sm text-white font-medium">{step}</p>
+                          {isActive && (
+                            <div className="mt-3 w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                              <motion.div 
+                                className="bg-primary h-full"
+                                initial={{ width: "0%" }}
+                                animate={{ width: "100%" }}
+                                transition={{ duration: 0.8, repeat: Infinity }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <div className="pl-6 text-sm text-muted">
+                    Submit a query to inspect execution runtime.
                   </div>
-                  <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl bg-surface-container-highest border ${loading && idx === inspectorSteps.length - 1 ? 'border-tertiary/50 shadow' : 'border-outline-variant'} transition-colors duration-300`}>
-                    <div className="flex items-center justify-between space-x-2 mb-1">
-                      <div className={`font-bold ${loading && idx === inspectorSteps.length - 1 ? 'text-tertiary' : 'text-on-surface'}`}>Step {idx + 1}</div>
-                    </div>
-                    <div className="text-xs text-on-surface-variant mb-2">{step}</div>
-                    {loading && idx === inspectorSteps.length - 1 && (
-                      <div className="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-tertiary h-1.5 rounded-full w-[45%] animate-pulse"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-xs text-outline text-center mt-10">
-                Submit a query to inspect execution steps.
-              </div>
-            )}
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </main>
