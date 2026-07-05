@@ -84,11 +84,26 @@ export default function Dashboard() {
             />
             <button 
               onClick={handleDiscover}
-              className="ml-4 px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-semibold text-sm transition-all active:scale-95 flex items-center gap-2"
+              className="ml-4 px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-semibold text-sm transition-all active:scale-95 flex items-center gap-2 shrink-0"
             >
               Discover <ArrowRight size={16} />
             </button>
           </div>
+        </motion.div>
+
+        {/* Demo Buttons */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex flex-wrap justify-center gap-4 mt-6"
+        >
+          <button onClick={() => router.push('/client')} className="px-5 py-2.5 rounded-xl border border-primary/50 bg-primary/10 text-sm text-primary hover:bg-primary/20 hover:border-primary font-medium transition-all flex items-center gap-2">
+            <Users size={16} /> Client Portal Demo
+          </button>
+          <button onClick={() => router.push('/business')} className="px-5 py-2.5 rounded-xl border border-accent/50 bg-accent/10 text-sm text-accent hover:bg-accent/20 hover:border-accent font-medium transition-all flex items-center gap-2">
+            <Building2 size={16} /> Business Portal Demo
+          </button>
         </motion.div>
 
         {/* Suggestion Chips */}
