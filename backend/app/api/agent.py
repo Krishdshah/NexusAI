@@ -26,9 +26,31 @@ async def chat_with_agent(query: str, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(new_run)
 
+    # Fetch recent history for context
+    history_result = await db.execute(
+        select(AgentRun)
+        .order_by(desc(AgentRun.created_at))
+        .limit(5)
+    )
+    recent_runs = history_result.scalars().all()
+    # Reverse to get chronological order
+    recent_runs.reverse()
+    
+    context_prompt = "You are NexusAI, an Enterprise Business Discovery Agent. Here is the conversation history:\n"
+    has_history = False
+    for run in recent_runs:
+        if run.status == AgentRunStatus.COMPLETED and run.plan and "response" in run.plan:
+            context_prompt += f"User: {run.user_query}\nAgent: {run.plan['response']}\n"
+            has_history = True
+            
+    if not has_history:
+        context_prompt += "No previous conversation.\n"
+        
+    full_prompt = f"{context_prompt}\nUser: {query}\nAgent:"
+
     # Call LLM
     try:
-        response_text = await llm.generate_text(query)
+        response_text = await llm.generate_text(full_prompt)
         new_run.status = AgentRunStatus.COMPLETED
         new_run.plan = {"response": response_text}
     except Exception as e:
