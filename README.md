@@ -89,3 +89,5 @@ Please refer to the `docs/` folder for detailed design artifacts:
 - `API_CONTRACT.md`
 - `PROMPTS.md`
 - `TEST_PLAN.md`
+
+See [limitations.md](./limitations.md) for known platform limitations.
