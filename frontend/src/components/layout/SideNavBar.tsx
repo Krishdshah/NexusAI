@@ -11,10 +11,10 @@ export default function SideNavBar() {
     { name: "AI Agent", href: "/agent", icon: "smart_toy" },
     { name: "Execution History", href: "/history", icon: "history" },
     { name: "Dataset Explorer", href: "/explorer", icon: "database" },
-    { name: "Validation Reports", href: "#", icon: "verified" },
-    { name: "Approvals", href: "#", icon: "rule" },
-    { name: "Analytics", href: "#", icon: "analytics" },
-    { name: "Settings", href: "#", icon: "settings" },
+    { name: "Validation Reports", href: "/reports", icon: "verified" },
+    { name: "Approvals", href: "/approvals", icon: "rule" },
+    { name: "Analytics", href: "/analytics", icon: "analytics" },
+    { name: "Settings", href: "/settings", icon: "settings" },
   ];
 
   return (
@@ -45,11 +45,11 @@ export default function SideNavBar() {
       </div>
       
       <div className="mt-auto border-t border-outline-variant pt-4 flex flex-col gap-1">
-        <Link href="#" className="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all">
+        <Link href="/support" className="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all">
           <span className="material-symbols-outlined">help</span>
           <span className="font-label-caps text-[12px]">Support</span>
         </Link>
-        <Link href="#" className="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all">
+        <Link href="/login" className="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all">
           <span className="material-symbols-outlined">logout</span>
           <span className="font-label-caps text-[12px]">Sign Out</span>
         </Link>
