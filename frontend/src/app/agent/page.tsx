@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import TopNavBar from "@/components/layout/TopNavBar";
 import SideNavBar from "@/components/layout/SideNavBar";
 
@@ -12,14 +13,30 @@ interface Session {
 }
 
 export default function AIAgentWorkspace() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams?.get("query") || "";
   const [sessions, setSessions] = useState<Session[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeQuery, setActiveQuery] = useState("Logistics Optimization");
+  const [activeQuery, setActiveQuery] = useState(initialQuery || "Logistics Optimization");
   const [chatHistory, setChatHistory] = useState<{role: string, content: string}[]>([]);
+  
+  // Dynamic Inspector States
+  const [inspectorSteps, setInspectorSteps] = useState<string[]>([]);
+  
+  const processSteps = [
+    "Analyzing query intent...",
+    "Retrieving schema contexts...",
+    "Synthesizing logical plan...",
+    "Engaging LLM generation...",
+    "Validating output..."
+  ];
 
   useEffect(() => {
     fetchSessions();
+    if (initialQuery) {
+      handleRunQuery(initialQuery);
+    }
   }, []);
 
   const fetchSessions = async () => {
@@ -32,28 +49,44 @@ export default function AIAgentWorkspace() {
     }
   };
 
-  const handleRun = async () => {
-    if (!input.trim()) return;
-    const query = input;
-    setActiveQuery(query);
-    setChatHistory([...chatHistory, { role: "user", content: query }]);
+  const handleRunQuery = async (queryText: string) => {
+    if (!queryText.trim()) return;
+    setActiveQuery(queryText);
+    setChatHistory(prev => [...prev, { role: "user", content: queryText }]);
     setInput("");
     setLoading(true);
+    setInspectorSteps([]);
+
+    // Simulate stepping logic
+    let stepIndex = 0;
+    const interval = setInterval(() => {
+      if (stepIndex < processSteps.length) {
+        setInspectorSteps(prev => [...prev, processSteps[stepIndex]]);
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 800);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/agent/chat?query=${encodeURIComponent(query)}`, {
+      const res = await fetch(`http://localhost:8000/api/agent/chat?query=${encodeURIComponent(queryText)}`, {
         method: "POST"
       });
       const data = await res.json();
+      clearInterval(interval);
+      setInspectorSteps(processSteps); // Ensure all steps are shown
       setChatHistory(prev => [...prev, { role: "agent", content: data.response }]);
       fetchSessions();
     } catch (e) {
       console.error(e);
+      clearInterval(interval);
       setChatHistory(prev => [...prev, { role: "agent", content: "Error connecting to Agent." }]);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleRun = () => handleRunQuery(input);
 
   return (
     <>
@@ -138,27 +171,35 @@ export default function AIAgentWorkspace() {
           </div>
         </div>
 
-        {/* Right Panel: Execution Inspector (Simplified for now) */}
+        {/* Right Panel: Execution Inspector (Dynamic Simulation) */}
         <div className="w-[30%] bg-surface-container p-6 flex flex-col gap-6 hidden xl:flex">
           <h2 className="font-headline-md text-lg text-on-surface font-semibold">Execution Inspector</h2>
           <p className="text-xs text-outline uppercase tracking-wider mb-2">Real-Time Logic Visualization</p>
           
           <div className="flex flex-col gap-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant before:to-transparent">
-            {loading ? (
-              <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-tertiary bg-background text-tertiary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                  <div className="w-2 h-2 bg-tertiary rounded-full animate-ping"></div>
-                </div>
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl bg-surface-container-highest border border-tertiary/50 shadow">
-                  <div className="flex items-center justify-between space-x-2 mb-1">
-                    <div className="font-bold text-tertiary">Processing Query</div>
+            {inspectorSteps.length > 0 ? (
+              inspectorSteps.map((step, idx) => (
+                <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 ${loading && idx === inspectorSteps.length - 1 ? 'border-tertiary bg-background text-tertiary shadow' : 'border-primary bg-primary text-on-primary'} shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
+                    {loading && idx === inspectorSteps.length - 1 ? (
+                      <div className="w-2 h-2 bg-tertiary rounded-full animate-ping"></div>
+                    ) : (
+                      <span className="material-symbols-outlined text-[12px]">check</span>
+                    )}
                   </div>
-                  <div className="text-xs text-on-surface-variant mb-2">Engaging Qwen LLM...</div>
-                  <div className="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-tertiary h-1.5 rounded-full w-[45%] animate-pulse"></div>
+                  <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl bg-surface-container-highest border ${loading && idx === inspectorSteps.length - 1 ? 'border-tertiary/50 shadow' : 'border-outline-variant'} transition-colors duration-300`}>
+                    <div className="flex items-center justify-between space-x-2 mb-1">
+                      <div className={`font-bold ${loading && idx === inspectorSteps.length - 1 ? 'text-tertiary' : 'text-on-surface'}`}>Step {idx + 1}</div>
+                    </div>
+                    <div className="text-xs text-on-surface-variant mb-2">{step}</div>
+                    {loading && idx === inspectorSteps.length - 1 && (
+                      <div className="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-tertiary h-1.5 rounded-full w-[45%] animate-pulse"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              ))
             ) : (
               <div className="text-xs text-outline text-center mt-10">
                 Submit a query to inspect execution steps.
